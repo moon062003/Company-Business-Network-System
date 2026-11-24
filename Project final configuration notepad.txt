@@ -1,0 +1,407 @@
+Router 1-STATIC:
+-------------------------------------------------------
+en
+config t
+int fa0/0
+ip address 192.168.160.1 255.255.255.0
+no shut
+exit
+
+int fa1/0
+ip address 192.168.170.1 255.255.255.240
+no shut
+exit
+
+int fa2/0 
+ip address 192.168.40.1 255.255.255.0
+no shut
+exit
+
+int fa3/0
+ip address 192.168.10.1 255.255.255.0
+no shut
+exit
+
+ip route 192.168.20.0 255.255.255.0 192.168.160.2
+ip route 192.168.30.0 255.255.255.0 192.168.160.2
+ip route 192.168.50.0 255.255.255.224 192.168.170.2
+ip route 192.168.60.0 255.255.255.248 192.168.170.2
+ip route 192.168.70.0 255.255.255.0 192.168.160.2
+ip route 192.168.95.0 255.255.255.0 192.168.160.2
+ip route 192.168.100.0 255.255.255.0 192.168.170.2
+ip route 192.168.120.0 255.255.255.0 192.168.170.2
+
+
+----------------------------------------------------------
+Router 2-Dynamic:
+------------------------------------------------------------
+
+en
+config t
+int fa0/0
+ip address 192.168.20.1 255.255.255.0
+no shut
+exit
+
+int fa1/0
+ip address 192.168.160.2 255.255.255.0
+no shut
+exit
+
+int fa2/0 
+ip address 192.168.150.1 255.255.255.252
+no shut
+exit
+
+int fa3/0
+ip address 192.168.180.1 255.255.255.0
+no shut
+exit
+
+router rip
+version 2
+network 192.168.20.0
+network 192.168.160.0
+network 192.168.150.0
+network 192.168.180.0
+no auto summary
+exit
+
+config t
+router rip
+redistribute static
+exit
+
+ip route 192.168.10.0 255.255.255.0 192.168.160.1
+ip route 192.168.40.0 255.255.255.0 192.168.160.1
+ip route 192.168.100.0 255.255.255.0 192.168.150.2
+
+exit
+
+config t
+router rip
+redistribute ospf 1
+exit
+
+router ospf 1
+network 192.168.150.0 0.0.0.3 area 1
+
+--------------------------------------------------------------
+Router 3-Dynamic:
+--------------------------------------------------------------
+
+en
+config t
+int fa0/0
+ip address 192.168.30.1 255.255.255.0
+no shut
+exit
+
+int fa1/0
+ip address 192.168.180.2 255.255.255.0
+no shut
+exit
+
+int fa2/0 
+ip address 192.168.70.1 255.255.255.0
+no shut
+exit
+
+int fa3/0
+ip address 192.168.75.1 255.255.255.0
+no shut
+exit
+
+int fa4/0
+ip address 192.168.95.1 255.255.255.0
+no shut
+exit
+
+router rip
+version 2
+network 192.168.30.0
+network 192.168.180.0
+network 192.168.70.0
+network 192.168.75.0
+network 192.168.95.0
+no auto summary
+exit
+
+conf t
+router rip
+redistribute static
+exit
+
+ip route 192.168.10.0 255.255.255.0 192.168.180.1
+ip route 192.168.40.0 255.255.255.0 192.168.180.1
+ip route 192.168.100.0 255.255.255.0 192.168.180.1
+
+exit
+
+config t
+router rip
+redistribute ospf 1
+exit
+
+
+ip dhcp pool company1
+network 192.168.70.0 255.255.255.0
+default-router 192.168.70.1
+dns-server 192.168.70.50
+exit
+
+ip dhcp pool company2
+network 192.168.30.0 255.255.255.0
+default-router 192.168.30.1
+dns-server 192.168.70.50
+exit
+
+ip dhcp pool company3
+network 192.168.75.0 255.255.255.0
+default-router 192.168.75.1
+dns-server 192.168.70.50
+exit
+
+
+-------------------------------------------------------
+Router 4-OSPF
+---------------------------------------------------------
+en
+config t
+int fa0/0
+ip address 192.168.170.2 255.255.255.240
+no shut
+exit
+
+int fa1/0
+ip address 192.168.150.2 255.255.255.252 
+no shut
+exit
+
+int fa2/0
+ip address 192.168.50.1 255.255.255.224 
+no shut
+exit
+
+int fa3/0
+ip address 192.168.60.1 255.255.255.248
+no shut
+exit
+
+int fa4/0
+ip address 192.168.190.1 255.255.255.224
+no shut
+exit
+
+router ospf 1
+network 192.168.170.0 0.0.0.15 area 1 
+network 192.168.150.0 0.0.0.3 area 1 
+network 192.168.50.0 0.0.0.31 area 1
+network 192.168.60.0 0.0.0.7 area 1
+
+exit
+
+config t
+router ospf 1
+redistribute static
+exit
+
+ip route 192.168.10.0 255.255.255.0 192.168.170.1
+ip route 192.168.40.0 255.255.255.0 192.168.170.1
+ip route 192.168.100.0 255.255.255.0 192.168.190.2
+exit
+
+config t
+router rip
+version 2
+network 192.168.150.0
+no auto summary
+exit
+
+router ospf 1
+redistribute rip subnets
+exit
+
+
+ip dhcp pool company4
+network 192.168.60.0 255.255.255.248
+default-router 192.168.60.1
+dns-server 192.168.60.50
+exit
+
+ip dhcp pool company5
+network 192.168.50.0 255.255.255.224
+default-router 192.168.50.1
+dns-server 192.168.60.50
+exit
+
+
+-------------------------------------------------
+Router 5-STATIC:
+-------------------------------------------------
+en
+config t
+int fa0/0
+ip address 192.168.190.2 255.255.255.224
+no shut
+exit
+
+interface fa1/0.80
+encapsulation dot1Q 80
+ip address 192.168.80.1 255.255.255.0
+no shut
+
+interface fa1/0.85
+encapsulation dot1Q 85
+ip address 192.168.85.1 255.255.255.0
+no shut
+
+interface fa1/0.90
+encapsulation dot1Q 90
+ip address 192.168.90.1 255.255.255.0
+no shut
+
+
+int fa2/0 
+ip address 192.168.100.1 255.255.255.0
+no shut
+exit
+
+ip route 192.168.10.0 255.255.255.0 192.168.190.1
+ip route 192.168.20.0 255.255.255.0 192.168.190.1
+ip route 192.168.30.0 255.255.255.0 192.168.190.1
+ip route 192.168.40.0 255.255.255.0 192.168.190.1
+ip route 192.168.50.0 255.255.255.224 192.168.190.1
+ip route 192.168.60.0 255.255.255.248 192.168.190.1
+ip route 192.168.70.0 255.255.255.0 192.168.190.1
+
+
+
+
+==============================================
+Vlan project
+=============================================
+
+----------------------------------------------
+SWITCH 1
+----------------------------------------------
+
+en
+config t
+
+vlan 80
+name VLAN80
+exit
+
+vlan 85
+name VLAN85
+exit
+
+vlan 90
+name VLAN90
+exit
+
+
+int fa0/2
+switchport mode access
+switchport access vlan 80
+exit
+
+int fa0/3
+switchport mode access
+switchport access vlan 80
+exit
+
+int fa0/4
+switchport mode access
+switchport access vlan 85
+exit
+
+int fa0/5
+switchport mode access
+switchport access vlan 85
+exit
+
+int fa0/6
+switchport mode access
+switchport access vlan 90
+exit
+
+int fa0/7
+switchport mode access
+switchport access vlan 90
+exit
+
+
+int fa0/8
+switchport mode trunk 
+exit
+
+
+interface range fa0/2-7
+switchport mode access 
+exit
+
+
+-----------------------------------------------
+SWITCH 2
+-----------------------------------------------
+
+en
+config t
+
+vlan 80
+name VLAN80
+exit
+
+vlan 85
+name VLAN85
+exit
+
+vlan 90
+name VLAN90
+exit
+
+
+int fa0/1
+switchport mode access
+switchport access vlan 85
+exit
+
+int fa0/2
+switchport mode access
+switchport access vlan 85
+exit
+
+int fa0/3
+switchport mode access
+switchport access vlan 90
+exit
+
+int fa0/4
+switchport mode access
+switchport access vlan 90
+exit
+
+int fa0/5
+switchport mode access
+switchport access vlan 80
+exit
+
+int fa0/6
+switchport mode access
+switchport access vlan 80
+exit
+
+
+interface fa0/9
+switchport mode trunk 
+exit
+
+interface range fa0/1-7
+switchport mode access 
+exit
+
+
+
+
